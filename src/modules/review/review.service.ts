@@ -76,9 +76,56 @@ export class ReviewService {
     return review;
   }
 
-  
+  async getProviderReviews(providerId: string) {
+    const reviews = await prisma.review.findMany({
+      where: { vendorId },
+      include: {
+        customer: {
+          select: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  
+    // Calculate average rating
+    const avgRating =
+      reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+        : 0;
+
+    return {
+      reviews,
+      averageRating: Number(avgRating.toFixed(1)),
+      totalReviews: reviews.length,
+    };
+  }
+
+  async getCustomerReviews(customerId: string) {
+    const reviews = await prisma.review.findMany({
+      where: { customerId },
+      include: {
+        vendor: {
+          select: {
+            id: true,
+            shopName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return reviews;
+  }
 
  
 

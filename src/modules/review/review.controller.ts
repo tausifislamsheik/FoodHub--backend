@@ -24,9 +24,32 @@ export class ReviewController {
     }
   }
 
-  
+  async getProviderReviews(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { vendorId } = req.params;
+      const result = await reviewService.getVendorReviews(vendorId);
+      sendSuccess(res, result, "Vendor reviews retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
-  
+  async getMyReviews(req: Request, res: Response, next: NextFunction) {
+    try {
+      const customer = await prisma.customer.findUnique({
+        where: { userId: req.user!.id },
+      });
+
+      if (!customer) {
+        throw new AppError("Customer profile not found", 404);
+      }
+
+      const reviews = await reviewService.getCustomerReviews(customer.id);
+      sendSuccess(res, reviews, "Your reviews retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
  
 
