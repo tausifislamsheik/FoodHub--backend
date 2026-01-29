@@ -12,7 +12,7 @@ router.use(authenticate);
 
 // Customer routes
 router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderController.createOrder);
-
+router.post("/:id/cancel", authorize("CUSTOMER"), orderController.cancelOrder);
 
 // Common routes
 router.get("/my-orders", orderController.getMyOrders);

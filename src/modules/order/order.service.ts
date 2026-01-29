@@ -212,7 +212,93 @@ export class OrderService {
     return orders;
   }
 
-  
+  async updateOrderStatus(id: string, status: OrderStatus, userId: string, userRole: string) {
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        vendor: true,
+      },
+    });
 
-  
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    // Only vendor can update order status
+    if (userRole === "VENDOR" && order.vendor.userId !== userId) {
+      throw new AppError("You can only update your own orders", 403);
+    }
+
+    // Validate status transitions
+    if (order.status === "DELIVERED" || order.status === "CANCELLED") {
+      throw new AppError("Cannot update completed or cancelled orders", 400);
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { status },
+      include: {
+        orderItems: {
+          include: {
+            menu: true,
+          },
+        },
+        vendor: {
+          select: {
+            shopName: true,
+          },
+        },
+        customer: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return updatedOrder;
+  }
+
+  async cancelOrder(id: string, customerId: string) {
+    const order = await prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    if (order.customerId !== customerId) {
+      throw new AppError("You can only cancel your own orders", 403);
+    }
+
+    // Can only cancel pending or confirmed orders
+    if (!["PENDING", "CONFIRMED"].includes(order.status)) {
+      throw new AppError("Cannot cancel this order", 400);
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+      include: {
+        orderItems: {
+          include: {
+            menu: true,
+          },
+        },
+        vendor: {
+          select: {
+            shopName: true,
+          },
+        },
+      },
+    });
+
+    return updatedOrder;
+  }
 }

@@ -103,5 +103,22 @@ export class OrderController {
     }
   }
 
-  
+  async cancelOrder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      const customer = await prisma.customer.findUnique({
+        where: { userId: req.user!.id },
+      });
+
+      if (!customer) {
+        throw new AppError("Customer profile not found", 404);
+      }
+
+      const order = await orderService.cancelOrder(id, customer.id);
+      sendSuccess(res, order, "Order cancelled successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 }
