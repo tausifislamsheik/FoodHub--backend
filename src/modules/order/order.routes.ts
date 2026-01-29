@@ -18,6 +18,12 @@ router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderContro
 router.get("/my-orders", orderController.getMyOrders);
 router.get("/:id", orderController.getOrderById);
 
-
+// Vendor routes
+router.patch(
+  "/:id/status",
+  authorize("VENDOR"),
+  validate(updateOrderStatusSchema),
+  orderController.updateOrderStatus
+);
 
 export default router;

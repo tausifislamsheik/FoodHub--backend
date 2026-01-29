@@ -85,7 +85,23 @@ export class OrderController {
     }
   }
 
-  
+  async updateOrderStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const order = await orderService.updateOrderStatus(
+        id,
+        status,
+        req.user!.id,
+        req.user!.role
+      );
+
+      sendSuccess(res, order, "Order status updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
   
 }
