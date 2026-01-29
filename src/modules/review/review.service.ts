@@ -127,7 +127,33 @@ export class ReviewService {
     return reviews;
   }
 
- 
+  async updateReview(id: string, customerId: string, data: Partial<CreateReviewData>) {
+    const review = await prisma.review.findUnique({
+      where: { id },
+    });
+
+    if (!review) {
+      throw new AppError("Review not found", 404);
+    }
+
+    if (review.customerId !== customerId) {
+      throw new AppError("You can only update your own reviews", 403);
+    }
+
+    const updatedReview = await prisma.review.update({
+      where: { id },
+      data,
+      include: {
+        vendor: {
+          select: {
+            shopName: true,
+          },
+        },
+      },
+    });
+
+    return updatedReview;
+  }
 
   
 }

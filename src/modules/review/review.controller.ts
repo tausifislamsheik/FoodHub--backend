@@ -51,7 +51,23 @@ export class ReviewController {
     }
   }
 
- 
+  async updateReview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const customer = await prisma.customer.findUnique({
+        where: { userId: req.user!.id },
+      });
+
+      if (!customer) {
+        throw new AppError("Customer profile not found", 404);
+      }
+
+      const review = await reviewService.updateReview(id, customer.id, req.body);
+      sendSuccess(res, review, "Review updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
   
 }
