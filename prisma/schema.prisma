@@ -12,7 +12,7 @@ datasource db {
 
 enum Role {
   CUSTOMER
-  VENDOR
+  PROVIDER
   ADMIN
 }
 
@@ -40,7 +40,7 @@ model User {
 
   // Relations
   customer      Customer?
-  vendor        Vendor?
+  provider        Provider?
   sessions      Session[]
 
   @@map("users")
@@ -67,8 +67,8 @@ model Customer {
   @@index([userId])
 }
 
-// ==================== Vendor Model ====================
-model Vendor {
+// ==================== Provider Model ====================
+model Provider {
   id          String   @id @default(uuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -85,7 +85,7 @@ model Vendor {
   orders  Order[]
   reviews Review[]
 
-  @@map("vendors")
+  @@map("providers")
   @@index([userId])
   @@index([isApproved])
   @@index([shopName])
@@ -94,8 +94,8 @@ model Vendor {
 // ==================== Menu Model ====================
 model Menu {
   id          String   @id @default(uuid())
-  vendorId    String
-  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  providerId    String
+  provider      Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
   name        String
   description String?
   price       Float
@@ -109,11 +109,11 @@ model Menu {
   orderItems OrderItem[]
 
   @@map("menus")
-  @@index([vendorId])
+  @@index([providerId])
   @@index([category])
   @@index([isAvailable])
-  @@index([vendorId, isAvailable])
-  @@index([vendorId, category])
+  @@index([providerId, isAvailable])
+  @@index([providerId, category])
 }
 
 // ==================== Order Model ====================
@@ -121,8 +121,8 @@ model Order {
   id              String      @id @default(uuid())
   customerId      String
   customer        Customer    @relation(fields: [customerId], references: [id])
-  vendorId        String
-  vendor          Vendor      @relation(fields: [vendorId], references: [id])
+  providerId        String
+  provider          Provider      @relation(fields: [providerId], references: [id])
   status          OrderStatus @default(PENDING)
   totalAmount     Float
   deliveryAddress String
@@ -135,12 +135,12 @@ model Order {
 
   @@map("orders")
   @@index([customerId])
-  @@index([vendorId])
+  @@index([providerId])
   @@index([status])
   @@index([createdAt])
   @@index([customerId, status])
-  @@index([vendorId, status])
-  @@index([vendorId, createdAt])
+  @@index([providerId, status])
+  @@index([providerId, createdAt])
 }
 
 // ==================== OrderItem Model ====================
@@ -164,8 +164,8 @@ model Review {
   id         String   @id @default(uuid())
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
-  vendorId   String
-  vendor     Vendor   @relation(fields: [vendorId], references: [id])
+  providerId   String
+  provider     Provider   @relation(fields: [providerId], references: [id])
   rating     Int      @db.SmallInt
   comment    String?
   createdAt  DateTime @default(now())
@@ -173,10 +173,10 @@ model Review {
 
   @@map("reviews")
   @@index([customerId])
-  @@index([vendorId])
+  @@index([providerId])
   @@index([rating])
-  @@index([vendorId, rating])
-  @@index([vendorId, createdAt])
+  @@index([providerId, rating])
+  @@index([providerId, createdAt])
 }
 
 // ==================== Session Model ====================

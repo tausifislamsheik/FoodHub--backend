@@ -8,7 +8,7 @@ interface OrderItem {
 }
 
 interface CreateOrderData {
-  vendorId: string;
+  providerId: string;
   items: OrderItem[];
   deliveryAddress: string;
   specialNotes?: string;
@@ -16,27 +16,27 @@ interface CreateOrderData {
 
 export class OrderService {
   async createOrder(customerId: string, data: CreateOrderData) {
-    const { vendorId, items, deliveryAddress, specialNotes } = data;
+    const { providerId, items, deliveryAddress, specialNotes } = data;
 
-    // Verify vendor exists and is approved
-    const vendor = await prisma.vendor.findUnique({
-      where: { id: vendorId },
+    // Verify provider exists and is approved
+    const provider = await prisma.provider.findUnique({
+      where: { id: providerId },
     });
 
-    if (!vendor) {
-      throw new AppError("Vendor not found", 404);
+    if (!provider) {
+      throw new AppError("Provider not found", 404);
     }
 
-    if (!vendor.isApproved) {
-      throw new AppError("This vendor is not yet approved", 403);
+    if (!provider.isApproved) {
+      throw new AppError("This provider is not yet approved", 403);
     }
 
-    // Verify all menu items exist and belong to the vendor
+    // Verify all menu items exist and belong to the provider
     const menuIds = items.map((item) => item.menuId);
     const menus = await prisma.menu.findMany({
       where: {
         id: { in: menuIds },
-        vendorId,
+        providerId,
         isAvailable: true,
       },
     });
@@ -63,7 +63,7 @@ export class OrderService {
     const order = await prisma.order.create({
       data: {
         customerId,
-        vendorId,
+        providerId,
         totalAmount,
         deliveryAddress,
         specialNotes,
@@ -77,7 +77,7 @@ export class OrderService {
             menu: true,
           },
         },
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -110,7 +110,7 @@ export class OrderService {
             menu: true,
           },
         },
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -158,7 +158,7 @@ export class OrderService {
             },
           },
         },
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -173,8 +173,8 @@ export class OrderService {
     return orders;
   }
 
-  async getVendorOrders(vendorId: string, status?: OrderStatus) {
-    const where: any = { vendorId };
+  async getProviderOrders(providerId: string, status?: OrderStatus) {
+    const where: any = { providerId };
 
     if (status) {
       where.status = status;
@@ -216,7 +216,7 @@ export class OrderService {
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
-        vendor: true,
+        provider: true,
       },
     });
 
@@ -224,8 +224,8 @@ export class OrderService {
       throw new AppError("Order not found", 404);
     }
 
-    // Only vendor can update order status
-    if (userRole === "VENDOR" && order.vendor.userId !== userId) {
+    // Only provider can update order status
+    if (userRole === "PROVIDER" && order.provider.userId !== userId) {
       throw new AppError("You can only update your own orders", 403);
     }
 
@@ -243,7 +243,7 @@ export class OrderService {
             menu: true,
           },
         },
-        vendor: {
+        provider: {
           select: {
             shopName: true,
           },
@@ -291,7 +291,7 @@ export class OrderService {
             menu: true,
           },
         },
-        vendor: {
+        provider: {
           select: {
             shopName: true,
           },

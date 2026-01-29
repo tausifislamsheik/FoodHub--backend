@@ -26,9 +26,9 @@ export class ReviewController {
 
   async getProviderReviews(req: Request, res: Response, next: NextFunction) {
     try {
-      const { vendorId } = req.params;
-      const result = await reviewService.getVendorReviews(vendorId);
-      sendSuccess(res, result, "Vendor reviews retrieved successfully");
+      const { providerId } = req.params;
+      const result = await reviewService.getProviderReviews(providerId);
+      sendSuccess(res, result, "Provider reviews retrieved successfully");
     } catch (error) {
       next(error);
     }

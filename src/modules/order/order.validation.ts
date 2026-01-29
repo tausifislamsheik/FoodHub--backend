@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createOrderSchema = z.object({
   body: z.object({
-    vendorId: z.string().uuid("Invalid vendor ID"),
+    providerId: z.string().uuid("Invalid provider ID"),
     items: z.array(
       z.object({
         menuId: z.string().uuid("Invalid menu ID"),

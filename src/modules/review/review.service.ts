@@ -9,49 +9,49 @@ interface CreateReviewData {
 
 export class ReviewService {
   async createReview(customerId: string, data: CreateReviewData) {
-    const { vendorId, rating, comment } = data;
+    const { providerId, rating, comment } = data;
 
-    // Verify vendor exists
-    const vendor = await prisma.vendor.findUnique({
-      where: { id: vendorId },
+    // Verify provider exists
+    const provider = await prisma.provider.findUnique({
+      where: { id: providerId },
     });
 
-    if (!vendor) {
-      throw new AppError("Vendor not found", 404);
+    if (!provider) {
+      throw new AppError("Provider not found", 404);
     }
 
-    // Check if customer has ordered from this vendor
+    // Check if customer has ordered from this provider
     const hasOrdered = await prisma.order.findFirst({
       where: {
         customerId,
-        vendorId,
+        providerId,
         status: "DELIVERED",
       },
     });
 
     if (!hasOrdered) {
       throw new AppError(
-        "You can only review vendors you have ordered from",
+        "You can only review providers you have ordered from",
         403
       );
     }
 
-    // Check if customer already reviewed this vendor
+    // Check if customer already reviewed this provider
     const existingReview = await prisma.review.findFirst({
       where: {
         customerId,
-        vendorId,
+        providerId,
       },
     });
 
     if (existingReview) {
-      throw new AppError("You have already reviewed this vendor", 409);
+      throw new AppError("You have already reviewed this provider", 409);
     }
 
     const review = await prisma.review.create({
       data: {
         customerId,
-        vendorId,
+        providerId,
         rating,
         comment,
       },
@@ -65,7 +65,7 @@ export class ReviewService {
             },
           },
         },
-        vendor: {
+        provider: {
           select: {
             shopName: true,
           },
@@ -78,7 +78,7 @@ export class ReviewService {
 
   async getProviderReviews(providerId: string) {
     const reviews = await prisma.review.findMany({
-      where: { vendorId },
+      where: { providerId },
       include: {
         customer: {
           select: {
@@ -112,7 +112,7 @@ export class ReviewService {
     const reviews = await prisma.review.findMany({
       where: { customerId },
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -144,7 +144,7 @@ export class ReviewService {
       where: { id },
       data,
       include: {
-        vendor: {
+        provider: {
           select: {
             shopName: true,
           },

@@ -11,27 +11,27 @@ interface CreateMenuData {
 }
 
 export class MenuService {
-  async createMenu(vendorId: string, data: CreateMenuData) {
-    // Verify vendor exists
-    const vendor = await prisma.vendor.findUnique({
-      where: { id: vendorId },
+  async createMenu(providerId: string, data: CreateMenuData) {
+    // Verify provider exists
+    const provider = await prisma.provider.findUnique({
+      where: { id: providerId },
     });
 
-    if (!vendor) {
-      throw new AppError("Vendor not found", 404);
+    if (!provider) {
+      throw new AppError("Provider not found", 404);
     }
 
-    if (!vendor.isApproved) {
-      throw new AppError("Vendor is not approved yet", 403);
+    if (!provider.isApproved) {
+      throw new AppError("Provider is not approved yet", 403);
     }
 
     const menu = await prisma.menu.create({
       data: {
         ...data,
-        vendorId,
+        providerId,
       },
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -43,8 +43,8 @@ export class MenuService {
     return menu;
   }
 
-  async getMenusByVendor(vendorId: string, filters?: any) {
-    const where: any = { vendorId };
+  async getMenusByProvider(providerId: string, filters?: any) {
+    const where: any = { providerId };
 
     if (filters?.category) {
       where.category = filters.category;
@@ -57,7 +57,7 @@ export class MenuService {
     const menus = await prisma.menu.findMany({
       where,
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -77,7 +77,7 @@ export class MenuService {
     const menu = await prisma.menu.findUnique({
       where: { id },
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -95,8 +95,8 @@ export class MenuService {
     return menu;
   }
 
-  async updateMenu(id: string, vendorId: string, data: Partial<CreateMenuData>) {
-    // Verify menu belongs to vendor
+  async updateMenu(id: string, providerId: string, data: Partial<CreateMenuData>) {
+    // Verify menu belongs to provider
     const menu = await prisma.menu.findUnique({
       where: { id },
     });
@@ -105,7 +105,7 @@ export class MenuService {
       throw new AppError("Menu item not found", 404);
     }
 
-    if (menu.vendorId !== vendorId) {
+    if (menu.providerId !== providerId) {
       throw new AppError("You can only update your own menu items", 403);
     }
 
@@ -113,7 +113,7 @@ export class MenuService {
       where: { id },
       data,
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -125,7 +125,7 @@ export class MenuService {
     return updatedMenu;
   }
 
-  async deleteMenu(id: string, vendorId: string) {
+  async deleteMenu(id: string, providerId: string) {
     const menu = await prisma.menu.findUnique({
       where: { id },
     });
@@ -134,7 +134,7 @@ export class MenuService {
       throw new AppError("Menu item not found", 404);
     }
 
-    if (menu.vendorId !== vendorId) {
+    if (menu.providerId !== providerId) {
       throw new AppError("You can only delete your own menu items", 403);
     }
 
@@ -159,7 +159,7 @@ export class MenuService {
     const menus = await prisma.menu.findMany({
       where,
       include: {
-        vendor: {
+        provider: {
           select: {
             id: true,
             shopName: true,
@@ -173,19 +173,19 @@ export class MenuService {
       },
     });
 
-    // Filter only approved vendors
-    return menus.filter((menu) => menu.vendor.isApproved);
+    // Filter only approved providers
+    return menus.filter((menu) => menu.provider.isApproved);
   }
 
-  async getVendorMenu(userId: string) {
-    const vendor = await prisma.vendor.findUnique({
+  async getProviderMenu(userId: string) {
+    const provider = await prisma.provider.findUnique({
       where: { userId },
     });
 
-    if (!vendor) {
-      throw new AppError("Vendor not found", 404);
+    if (!provider) {
+      throw new AppError("Provider not found", 404);
     }
 
-    return this.getMenusByVendor(vendor.id);
+    return this.getMenusByProvider(provider.id);
   }
 }

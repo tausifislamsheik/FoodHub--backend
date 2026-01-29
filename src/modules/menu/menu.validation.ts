@@ -25,9 +25,9 @@ export const updateMenuSchema = z.object({
   }),
 });
 
-export const getMenusByVendorSchema = z.object({
+export const getMenusByProviderSchema = z.object({
   params: z.object({
-    vendorId: z.string().uuid(),
+    providerId: z.string().uuid(),
   }),
   query: z.object({
     category: z.string().optional(),

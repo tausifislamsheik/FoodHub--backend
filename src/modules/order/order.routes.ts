@@ -18,10 +18,10 @@ router.post("/:id/cancel", authorize("CUSTOMER"), orderController.cancelOrder);
 router.get("/my-orders", orderController.getMyOrders);
 router.get("/:id", orderController.getOrderById);
 
-// Vendor routes
+// Provider routes
 router.patch(
   "/:id/status",
-  authorize("VENDOR"),
+  authorize("PROVIDER"),
   validate(updateOrderStatusSchema),
   orderController.updateOrderStatus
 );

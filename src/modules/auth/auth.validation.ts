@@ -9,19 +9,19 @@ export const registerSchema = z.object({
       .max(100, "Password is too long"),
     name: z.string().min(2, "Name must be at least 2 characters"),
     phone: z.string().optional(),
-    role: z.enum(["CUSTOMER", "VENDOR"]).default("CUSTOMER"),
-    // Vendor-specific fields
+    role: z.enum(["CUSTOMER", "PROVIDER"]).default("CUSTOMER"),
+    // Provider-specific fields
     shopName: z.string().optional(),
     address: z.string().optional(),
     description: z.string().optional(),
   }).refine((data) => {
-    // If role is VENDOR, require shop details
-    if (data.role === "VENDOR") {
+    // If role is PROVIDER, require shop details
+    if (data.role === "PROVIDER") {
       return data.shopName && data.address;
     }
     return true;
   }, {
-    message: "Shop name and address are required for vendors",
+    message: "Shop name and address are required for providers",
   }),
 });
 

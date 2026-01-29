@@ -9,26 +9,26 @@ const menuService = new MenuService();
 export class MenuController {
   async createMenu(req: Request, res: Response, next: NextFunction) {
     try {
-      // Get vendor ID from user
-      const vendor = await prisma.vendor.findUnique({
+      // Get provider ID from user
+      const provider = await prisma.provider.findUnique({
         where: { userId: req.user!.id },
       });
 
-      if (!vendor) {
-        throw new AppError("Vendor profile not found", 404);
+      if (!provider) {
+        throw new AppError("Provider profile not found", 404);
       }
 
-      const menu = await menuService.createMenu(vendor.id, req.body);
+      const menu = await menuService.createMenu(provider.id, req.body);
       sendSuccess(res, menu, "Menu item created successfully", 201);
     } catch (error) {
       next(error);
     }
   }
 
-  async getMenusByVendor(req: Request, res: Response, next: NextFunction) {
+  async getMenusByProvider(req: Request, res: Response, next: NextFunction) {
     try {
-      const { vendorId } = req.params;
-      const menus = await menuService.getMenusByVendor(vendorId, req.query);
+      const { providerId } = req.params;
+      const menus = await menuService.getMenusByProvider(providerId, req.query);
       sendSuccess(res, menus, "Menus retrieved successfully");
     } catch (error) {
       next(error);
@@ -48,15 +48,15 @@ export class MenuController {
   async updateMenu(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const vendor = await prisma.vendor.findUnique({
+      const provider = await prisma.provider.findUnique({
         where: { userId: req.user!.id },
       });
 
-      if (!vendor) {
-        throw new AppError("Vendor profile not found", 404);
+      if (!provider) {
+        throw new AppError("Provider profile not found", 404);
       }
 
-      const menu = await menuService.updateMenu(id, vendor.id, req.body);
+      const menu = await menuService.updateMenu(id, provider.id, req.body);
       sendSuccess(res, menu, "Menu item updated successfully");
     } catch (error) {
       next(error);
@@ -66,15 +66,15 @@ export class MenuController {
   async deleteMenu(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const vendor = await prisma.vendor.findUnique({
+      const provider = await prisma.provider.findUnique({
         where: { userId: req.user!.id },
       });
 
-      if (!vendor) {
-        throw new AppError("Vendor profile not found", 404);
+      if (!provider) {
+        throw new AppError("Provider profile not found", 404);
       }
 
-      const result = await menuService.deleteMenu(id, vendor.id);
+      const result = await menuService.deleteMenu(id, provider.id);
       sendSuccess(res, result, "Menu item deleted successfully");
     } catch (error) {
       next(error);
@@ -92,7 +92,7 @@ export class MenuController {
 
   async getMyMenus(req: Request, res: Response, next: NextFunction) {
     try {
-      const menus = await menuService.getVendorMenu(req.user!.id);
+      const menus = await menuService.getProviderMenu(req.user!.id);
       sendSuccess(res, menus, "Your menus retrieved successfully");
     } catch (error) {
       next(error);

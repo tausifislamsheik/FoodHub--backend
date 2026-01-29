@@ -34,15 +34,15 @@ export class OrderController {
       const customer = await prisma.customer.findUnique({
         where: { userId: req.user!.id },
       });
-      const vendor = await prisma.vendor.findUnique({
+      const provider = await prisma.provider.findUnique({
         where: { userId: req.user!.id },
       });
 
       const isCustomerOrder = customer && order.customerId === customer.id;
-      const isVendorOrder = vendor && order.vendorId === vendor.id;
+      const isProviderOrder = provider && order.providerId === provider.id;
       const isAdmin = req.user!.role === "ADMIN";
 
-      if (!isCustomerOrder && !isVendorOrder && !isAdmin) {
+      if (!isCustomerOrder && !isProviderOrder && !isAdmin) {
         throw new AppError("You don't have access to this order", 403);
       }
 
@@ -65,17 +65,17 @@ export class OrderController {
 
         const orders = await orderService.getCustomerOrders(customer.id);
         sendSuccess(res, orders, "Your orders retrieved successfully");
-      } else if (req.user!.role === "VENDOR") {
-        const vendor = await prisma.vendor.findUnique({
+      } else if (req.user!.role === "PROVIDER") {
+        const provider = await prisma.provider.findUnique({
           where: { userId: req.user!.id },
         });
 
-        if (!vendor) {
-          throw new AppError("Vendor profile not found", 404);
+        if (!provider) {
+          throw new AppError("Provider profile not found", 404);
         }
 
         const status = req.query.status as OrderStatus | undefined;
-        const orders = await orderService.getVendorOrders(vendor.id, status);
+        const orders = await orderService.getProviderOrders(provider.id, status);
         sendSuccess(res, orders, "Orders retrieved successfully");
       } else {
         throw new AppError("Invalid user role", 400);
