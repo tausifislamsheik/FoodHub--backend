@@ -25,7 +25,32 @@ export class OrderController {
     }
   }
 
-  
+  async getOrderById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const order = await orderService.getOrderById(id);
+
+      // Verify access
+      const customer = await prisma.customer.findUnique({
+        where: { userId: req.user!.id },
+      });
+      const vendor = await prisma.vendor.findUnique({
+        where: { userId: req.user!.id },
+      });
+
+      const isCustomerOrder = customer && order.customerId === customer.id;
+      const isVendorOrder = vendor && order.vendorId === vendor.id;
+      const isAdmin = req.user!.role === "ADMIN";
+
+      if (!isCustomerOrder && !isVendorOrder && !isAdmin) {
+        throw new AppError("You don't have access to this order", 403);
+      }
+
+      sendSuccess(res, order, "Order retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
   
 

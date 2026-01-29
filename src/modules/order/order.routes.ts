@@ -15,7 +15,7 @@ router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderContro
 
 
 
-
+router.get("/:id", orderController.getOrderById);
 
 
 

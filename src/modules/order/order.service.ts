@@ -101,7 +101,48 @@ export class OrderService {
     return order;
   }
 
-  
+  async getOrderById(id: string) {
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        orderItems: {
+          include: {
+            menu: true,
+          },
+        },
+        vendor: {
+          select: {
+            id: true,
+            shopName: true,
+            address: true,
+            user: {
+              select: {
+                phone: true,
+              },
+            },
+          },
+        },
+        customer: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    return order;
+  }
 
   
 
