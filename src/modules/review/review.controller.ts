@@ -69,5 +69,21 @@ export class ReviewController {
     }
   }
 
-  
+  async deleteReview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const customer = await prisma.customer.findUnique({
+        where: { userId: req.user!.id },
+      });
+
+      if (!customer) {
+        throw new AppError("Customer profile not found", 404);
+      }
+
+      const result = await reviewService.deleteReview(id, customer.id);
+      sendSuccess(res, result, "Review deleted successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

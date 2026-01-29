@@ -155,5 +155,23 @@ export class ReviewService {
     return updatedReview;
   }
 
-  
+  async deleteReview(id: string, customerId: string) {
+    const review = await prisma.review.findUnique({
+      where: { id },
+    });
+
+    if (!review) {
+      throw new AppError("Review not found", 404);
+    }
+
+    if (review.customerId !== customerId) {
+      throw new AppError("You can only delete your own reviews", 403);
+    }
+
+    await prisma.review.delete({
+      where: { id },
+    });
+
+    return { message: "Review deleted successfully" };
+  }
 }

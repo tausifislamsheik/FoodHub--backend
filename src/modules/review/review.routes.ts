@@ -15,6 +15,6 @@ router.use(authenticate);
 router.post("/", authorize("CUSTOMER"), validate(createReviewSchema), reviewController.createReview);
 router.get("/my-reviews", authorize("CUSTOMER"), reviewController.getMyReviews);
 router.patch("/:id", authorize("CUSTOMER"), validate(updateReviewSchema), reviewController.updateReview);
-
+router.delete("/:id", authorize("CUSTOMER"), reviewController.deleteReview);
 
 export default router;
