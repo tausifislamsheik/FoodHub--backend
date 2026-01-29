@@ -144,7 +144,34 @@ export class OrderService {
     return order;
   }
 
-  
+  async getCustomerOrders(customerId: string) {
+    const orders = await prisma.order.findMany({
+      where: { customerId },
+      include: {
+        orderItems: {
+          include: {
+            menu: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        vendor: {
+          select: {
+            id: true,
+            shopName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return orders;
+  }
 
   
 

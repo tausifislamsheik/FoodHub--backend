@@ -14,7 +14,8 @@ router.use(authenticate);
 router.post("/", authorize("CUSTOMER"), validate(createOrderSchema), orderController.createOrder);
 
 
-
+// Common routes
+router.get("/my-orders", orderController.getMyOrders);
 router.get("/:id", orderController.getOrderById);
 
 

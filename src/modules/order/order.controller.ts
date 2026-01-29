@@ -52,7 +52,38 @@ export class OrderController {
     }
   }
 
-  
+  async getMyOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (req.user!.role === "CUSTOMER") {
+        const customer = await prisma.customer.findUnique({
+          where: { userId: req.user!.id },
+        });
+
+        if (!customer) {
+          throw new AppError("Customer profile not found", 404);
+        }
+
+        const orders = await orderService.getCustomerOrders(customer.id);
+        sendSuccess(res, orders, "Your orders retrieved successfully");
+      } else if (req.user!.role === "VENDOR") {
+        const vendor = await prisma.vendor.findUnique({
+          where: { userId: req.user!.id },
+        });
+
+        if (!vendor) {
+          throw new AppError("Vendor profile not found", 404);
+        }
+
+        const status = req.query.status as OrderStatus | undefined;
+        const orders = await orderService.getVendorOrders(vendor.id, status);
+        sendSuccess(res, orders, "Orders retrieved successfully");
+      } else {
+        throw new AppError("Invalid user role", 400);
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 
   
 
